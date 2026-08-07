@@ -32,3 +32,5 @@ fastapi_users = FastAPIUsers[Users, uuid.UUID](
     get_user_manager=get_user_manager,
     auth_backends=[auth_backend]
 )
+
+current_user = fastapi_users.current_user(active=True)
