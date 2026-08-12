@@ -28,13 +28,12 @@ class ConnectionManager:
         if not self.rooms[room_id]:
             del self.rooms[room_id]
 
-    async def broadcast(self, message: dict, room_id: UUID, sender_id: UUID):
-        if (room_id not in self.rooms) or (sender_id not in self.rooms[room_id]):
+    async def broadcast(self, message: dict, room_id: str, sender_id: str | None = None):
+        if room_id not in self.rooms:
             return
 
-
         for user_id, connection in self.rooms[room_id].items():
-            if user_id != sender_id:
+            if sender_id is None or str(user_id) != sender_id:
                 await connection.send_json(message)
 
     async def send_personal_message(self, message: dict, room_id: UUID, recipient_id: UUID):
@@ -52,10 +51,3 @@ class ConnectionManager:
 
 
 connection_manager = ConnectionManager()
-
-
-
-
-
-
-
