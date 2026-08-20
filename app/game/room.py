@@ -9,7 +9,8 @@ class ChainItem(BaseModel):
     text: str | None = None
     data: str| None = None
     round: int = 0
-
+    original_owner: str | None = None
+    player_id: str | None = None
 
 
 class Room(BaseModel):
@@ -22,6 +23,7 @@ class Room(BaseModel):
     round: int = 0
     max_rounds: int = 3
     chain: Dict[str, List[ChainItem]]
+    history: Dict[str, List[ChainItem]] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

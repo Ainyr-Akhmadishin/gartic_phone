@@ -58,7 +58,6 @@ function updateUI(phase) {
     const drawingInput = document.getElementById('drawing-input');
     const descInput = document.getElementById('desc-input');
 
-    // Блокируем/разблокируем кнопки и поля ввода
     if (phraseBtn) phraseBtn.disabled = phase !== 'writing';
     if (drawingBtn) drawingBtn.disabled = phase !== 'drawing';
     if (descBtn) descBtn.disabled = phase !== 'describing';
@@ -68,7 +67,6 @@ function updateUI(phase) {
     if (drawingInput) drawingInput.disabled = phase !== 'drawing';
     if (descInput) descInput.disabled = phase !== 'describing';
 
-    // Обновляем отображение фазы
     const phaseDisplay = document.getElementById('current-phase');
     if (phaseDisplay) {
         const phaseNames = {
@@ -80,6 +78,35 @@ function updateUI(phase) {
         };
         phaseDisplay.textContent = phaseNames[phase] || phase;
     }
+}
+
+// ============================================
+// ОТОБРАЖЕНИЕ ИСТОРИИ
+// ============================================
+function showHistory(history) {
+    const container = document.getElementById('history-container');
+    if (!container) return;
+
+    let html = '<h3>📜 Ваша цепочка искажений:</h3><div class="history-list">';
+
+    if (!history || history.length === 0) {
+        html += '<div class="history-item">История пуста</div>';
+    } else {
+        history.forEach((item, index) => {
+            const stepNum = index + 1;
+            if (item.type === 'phrase') {
+                html += `<div class="history-item">${stepNum}. 📝 Фраза: "${item.text}"</div>`;
+            } else if (item.type === 'drawing') {
+                html += `<div class="history-item">${stepNum}. 🎨 Рисунок: <img src="${item.data}" style="max-width:150px; max-height:150px; display:block; margin-top:5px; border-radius:4px;"></div>`;
+            } else if (item.type === 'description') {
+                html += `<div class="history-item">${stepNum}. 📄 Описание: "${item.text}"</div>`;
+            }
+        });
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+    container.style.display = 'block';
 }
 
 // ============================================
@@ -165,7 +192,6 @@ async function fetchUser() {
     }
 }
 
-// Проверка авторизации при загрузке
 if (token) {
     log('🔑 Токен найден, проверяем авторизацию...', 'auth');
     fetchUser();
@@ -306,9 +332,6 @@ function connectWS() {
 function handleWSMessage(data) {
     log(`📨 Получено сообщение: ${data.type || 'unknown'}`, 'ws');
 
-    // ============================================
-    // СТАРТ ИГРЫ
-    // ============================================
     if (data.type === 'game_started') {
         log('🎮 Игра началась!', 'success');
         document.getElementById('game-status').textContent = '🎮 Игра началась!';
@@ -319,18 +342,12 @@ function handleWSMessage(data) {
         return;
     }
 
-    // ============================================
-    // ОШИБКА
-    // ============================================
     if (data.type === 'error') {
         log(`❌ Ошибка: ${data.text}`, 'error');
         addMessage('Ошибка', data.text);
         return;
     }
 
-    // ============================================
-    // ЗАДАНИЕ
-    // ============================================
     if (data.type === 'task') {
         log(`📌 Задание получено: ${JSON.stringify(data.task)}`, 'info');
         document.getElementById('task-text').textContent = JSON.stringify(data.task, null, 2);
@@ -340,18 +357,12 @@ function handleWSMessage(data) {
         return;
     }
 
-    // ============================================
-    // РИСОВАНИЕ ОТ ДРУГОГО ИГРОКА
-    // ============================================
     if (data.type === 'draw') {
         log(`🖍 Рисование: (${data.x}, ${data.y})`, 'info');
         drawDot(data.x, data.y);
         return;
     }
 
-    // ============================================
-    // ЧАТ / ФРАЗА
-    // ============================================
     if (data.type === 'chat' || data.type === 'phrase') {
         log(`💬 Сообщение от ${data.username || 'Игрок'}: ${data.text || JSON.stringify(data)}`, 'info');
         const msgDiv = document.getElementById('game-messages');
@@ -360,30 +371,26 @@ function handleWSMessage(data) {
         return;
     }
 
-    // ============================================
-    // ИГРОКИ
-    // ============================================
     if (data.type === 'players') {
         log(`👥 Список игроков: ${data.players.join(', ')}`, 'info');
         document.getElementById('game-players').textContent = data.players.join(', ');
         return;
     }
 
-    // ============================================
-    // ФИНАЛ ИГРЫ
-    // ============================================
     if (data.type === 'game_over' || data.type === 'game_finished') {
         log('🏁 Игра завершена!', 'success');
         document.getElementById('task-text').textContent = '🎉 Игра завершена!';
         document.getElementById('game-status').textContent = '🏁 Игра завершена';
         updateUI('finished');
+
+        if (data.history) {
+            showHistory(data.history);
+        }
+
         addMessage('Финал', data);
         return;
     }
 
-    // ============================================
-    // НЕИЗВЕСТНЫЙ ТИП
-    // ============================================
     log(`📨 Неизвестный тип: ${data.type}`, 'warning');
     addMessage('Сервер', data);
 }
@@ -414,22 +421,16 @@ function sendPhrase() {
 }
 
 function sendDrawing() {
+    const btn = document.querySelector('.drawing-btn');
+    if (btn) btn.disabled = true;  // блокируем сразу
+
     const input = document.getElementById('drawing-input');
     const data = input.value.trim();
-    if (!data) {
-        log('⚠️ Введите данные рисунка (base64)', 'warning');
-        return;
-    }
-    if (!ws) {
-        log('⚠️ WebSocket не подключён', 'warning');
-        return;
-    }
-    if (currentPhase !== 'drawing') {
-        log(`⚠️ Сейчас нельзя отправлять рисунок (фаза: ${currentPhase})`, 'warning');
+    if (!data || !ws) {
+        if (btn) btn.disabled = false;  // разблокируем при ошибке
         return;
     }
 
-    log('📤 Отправка рисунка', 'ws');
     ws.send(JSON.stringify({ type: 'drawing', data: data }));
     addMessage('Вы', '📷 Рисунок отправлен');
     input.value = '';
@@ -482,7 +483,7 @@ function addMessage(from, content) {
 }
 
 // ============================================
-// КАНВАС (Рисование)
+// КАНВАС
 // ============================================
 canvas.addEventListener('mousedown', (e) => {
     if (!ws) {

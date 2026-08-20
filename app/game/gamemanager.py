@@ -24,7 +24,7 @@ class GameManager:
             status="waiting",
             created_at=datetime.now(timezone.utc),
             phase="waiting",
-            round=0,
+            round=1,
             max_rounds=3,
             chain={},
         )
@@ -72,27 +72,54 @@ class GameManager:
             return None
 
         players_count = len(room.players)
-        room.max_rounds = max(2, players_count - 1)
+        room.max_rounds = players_count
 
         room.status = "playing"
         room.phase = "writing"
         room.chain = {str(p): [] for p in room.players}
+        room.history = {str(p): [] for p in room.players}
 
         await self.save_room(room)
         return room
 
-    async def add_to_chain(self, room_id: UUID, user_id: UUID, item: ChainItem):
+    async def add_to_chain(
+            self,
+            room_id: UUID,
+            user_id: UUID,
+            item: ChainItem
+    ):
         room = await self.get_room(room_id)
+
         if not room:
             return None
 
         if user_id not in room.players:
             return None
 
-        room.chain[str(user_id)].append(item)
+        user_key = str(user_id)
+
+        if user_key not in room.chain:
+            room.chain[user_key] = []
+
+        room.chain[user_key].append(item)
+
+        if item.original_owner:
+            owner_key = str(item.original_owner)
+
+            if owner_key not in room.history:
+                room.history[owner_key] = []
+
+            room.history[owner_key].append(item)
 
         await self.save_room(room)
+
         return room
+
+    async def add_to_history(self, room: Room, owner_id: UUID, item: ChainItem):
+        owner_key = str(owner_id)
+        if owner_key not in room.history:
+            room.history[owner_key] = []
+        room.history[owner_key].append(item)
 
     async def get_previous_player(self, room: Room, user_id: UUID):
         if user_id not in room.players:
@@ -102,37 +129,55 @@ class GameManager:
         prev_index = (index_player - 1 + len(room.players)) % len(room.players)
         return room.players[prev_index]
 
+    async def get_next_player(self, room: Room, user_id: UUID):
+        if user_id not in room.players:
+            return None
+
+        index_player = room.players.index(user_id)
+        next_index = (index_player + 1) % len(room.players)
+        return room.players[next_index]
+
     async def get_task_for_user(self, room: Room, user_id: UUID):
         if room.phase == "writing":
-            return {"type": "phrase", "text": "Напишите фразу"}
+            return {
+                "type": "phrase",
+                "text": "Напишите фразу"
+            }
 
-        elif room.phase == "drawing":
-            prev_user = await self.get_previous_player(room, user_id)
-            if prev_user is None:
-                return None
+        prev_user = await self.get_previous_player(room, user_id)
 
-            prev_chain = room.chain.get(str(prev_user), [])
-            for item in reversed(prev_chain):
-                if item.type == "phrase":
-                    return {"type": "drawing", "text": f"Нарисуйте: {item.text}"}
-
+        if prev_user is None:
             return None
+
+        prev_chain = room.chain.get(str(prev_user), [])
+
+        if not prev_chain:
+            return None
+
+        item = prev_chain[-1]
+
+        if room.phase == "drawing":
+            if item.type == "phrase":
+                return {
+                    "type": "drawing",
+                    "text": f"Нарисуйте: {item.text}"
+                }
+
+            if item.type == "description":
+                return {
+                    "type": "drawing",
+                    "text": f"Нарисуйте: {item.text}"
+                }
 
         elif room.phase == "describing":
-            prev_user = await self.get_previous_player(room, user_id)
-            if prev_user is None:
-                return None
+            if item.type == "drawing":
+                return {
+                    "type": "describing",
+                    "text": "Опишите, что вы видите",
+                    "data": item.data
+                }
 
-            prev_chain = room.chain.get(str(prev_user), [])
-            for item in reversed(prev_chain):
-                if item.type == "drawing":
-                    return {
-                        "type": "describing",
-                        "text": "Опишите, что вы видите",
-                        "data": item.data
-                    }
-
-            return None
+        return None
 
     async def set_player_ready(self, room_id: UUID, user_id: UUID):
         room = await self.get_room(room_id)
@@ -160,25 +205,38 @@ class GameManager:
 
     async def next_phase(self, room_id: UUID):
         room = await self.get_room(room_id)
+
         if not room:
             return None
 
         if room.phase == "writing":
+            room.round = 2
             room.phase = "drawing"
 
         elif room.phase == "drawing":
-            room.phase = "describing"
+            room.round += 1
+
+            if room.round > room.max_rounds:
+                room.phase = "finished"
+            else:
+                room.phase = "describing"
 
         elif room.phase == "describing":
-            if room.round + 1 >= room.max_rounds:
+            room.round += 1
+
+            if room.round > room.max_rounds:
                 room.phase = "finished"
             else:
                 room.phase = "drawing"
-                room.round += 1
 
         room.ready_players = []
+
         await self.save_room(room)
+
         return room
+
+    async def get_history(self, room: Room, user_id: UUID):
+        return room.history.get(str(user_id), [])
 
 
 game_manager = GameManager()
