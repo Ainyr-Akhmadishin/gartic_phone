@@ -142,29 +142,34 @@ async function login() {
     log('🔄 Вход в систему...', 'auth');
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
+    const rememberMe = document.getElementById('remember-me').checked;
 
     try {
-        const formData = new URLSearchParams();
-        formData.append('username', email);
-        formData.append('password', password);
-
-        const res = await fetch('/auth/jwt/login', {
+        const response = await fetch('/auth/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData,
-            credentials: 'include'
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                remember_me: rememberMe,
+            }),
+            credentials: 'include',
         });
 
-        if (res.ok) {
-            log(`✅ Вход выполнен для ${email}`, 'success');
+        const data = await response.json();
+
+        if (response.ok) {
+            log(`✅ Вход выполнен для ${email}, remember_me: ${rememberMe}`, 'success');
+            document.getElementById('auth-status').textContent = `✅ Вход выполнен! (${rememberMe ? 'Запомнен' : 'Сессия'})`;
             await fetchUser();
         } else {
-            const err = await res.json();
-            log(`❌ Ошибка входа: ${err.detail || 'Неверный email или пароль'}`, 'error');
-            document.getElementById('auth-status').textContent = '❌ ' + (err.detail || 'Неверный email или пароль');
+            log(`❌ Ошибка входа: ${data.detail || 'Неизвестная ошибка'}`, 'error');
+            document.getElementById('auth-status').textContent = `❌ ${data.detail || 'Ошибка входа'}`;
         }
     } catch (e) {
-        log(`❌ Ошибка входа: ${e.message}`, 'error');
+        log(`❌ Ошибка: ${e.message}`, 'error');
         document.getElementById('auth-status').textContent = '❌ Ошибка: ' + e.message;
     }
 }
@@ -173,22 +178,19 @@ async function fetchUser() {
     log('🔄 Получение данных пользователя...', 'auth');
     try {
         const res = await fetch('/users/me', {
-            credentials: 'include'
+            credentials: 'include'  // ← кука отправляется автоматически
         });
         if (res.ok) {
             currentUser = await res.json();
-            log(`✅ Пользователь: ${currentUser.username || currentUser.email} (ID: ${currentUser.id})`, 'success');
-            document.getElementById('user-name').textContent = currentUser.username || currentUser.email;
+            // Показываем лобби
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('lobby').style.display = 'block';
-            document.getElementById('auth-status').textContent = '✅ Вы вошли как ' + (currentUser.username || currentUser.email);
         } else {
-            log('❌ Не авторизован', 'error');
+            // 401 — не авторизован
             document.getElementById('auth-status').textContent = '❌ Не авторизован';
         }
     } catch (e) {
         log(`❌ Ошибка: ${e.message}`, 'error');
-        document.getElementById('auth-status').textContent = '❌ Ошибка: ' + e.message;
     }
 }
 
@@ -422,18 +424,25 @@ function sendPhrase() {
 
 function sendDrawing() {
     const btn = document.querySelector('.drawing-btn');
-    if (btn) btn.disabled = true;  // блокируем сразу
+    if (btn) btn.disabled = true;
 
     const input = document.getElementById('drawing-input');
     const data = input.value.trim();
     if (!data || !ws) {
-        if (btn) btn.disabled = false;  // разблокируем при ошибке
+        if (btn) btn.disabled = false;
+        return;
+    }
+    if (currentPhase !== 'drawing') {
+        log(`⚠️ Сейчас нельзя отправлять рисунок (фаза: ${currentPhase})`, 'warning');
+        if (btn) btn.disabled = false;
         return;
     }
 
+    log('📤 Отправка рисунка', 'ws');
     ws.send(JSON.stringify({ type: 'drawing', data: data }));
     addMessage('Вы', '📷 Рисунок отправлен');
     input.value = '';
+    if (btn) btn.disabled = false;
 }
 
 function sendDescription() {
@@ -525,3 +534,6 @@ function drawDot(x, y, color = '#000') {
     ctx.arc(x, y, 3, 0, Math.PI * 2);
     ctx.fill();
 }
+
+// В самом конце app.js
+fetchUser();

@@ -1,6 +1,7 @@
 
 
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase, SQLAlchemyBaseUserTableUUID
+from pydantic import BaseModel
 from sqlalchemy import String
 from sqlalchemy.orm import DeclarativeBase, Mapped
 from sqlalchemy.testing.schema import mapped_column
@@ -12,3 +13,8 @@ class Base(DeclarativeBase):
 class Users(SQLAlchemyBaseUserTableUUID,Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     pass
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+    remember_me: bool

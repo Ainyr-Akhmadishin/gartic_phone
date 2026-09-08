@@ -20,6 +20,11 @@ SECRET="SECRET"
 def get_jwt_strategy()->JWTStrategy:
     return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
 
+def get_long_lifetime()->JWTStrategy:
+    return JWTStrategy(secret=SECRET, lifetime_seconds=2590000)
+
+def get_short_lifetime()->JWTStrategy:
+    return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
 
 auth_backend = AuthenticationBackend(
     name = 'jwt',
@@ -34,3 +39,5 @@ fastapi_users = FastAPIUsers[Users, uuid.UUID](
 )
 
 current_user = fastapi_users.current_user(active=True)
+
+

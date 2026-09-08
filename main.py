@@ -8,6 +8,7 @@ from app.game.gamemanager import game_manager
 from app.schemas import UserRead, UserCreate, UserUpdate
 from app.api.room import router as room_router
 from app.api.connection import router as connection_router
+from app.api.login import router as login_router
 
 async def lifespan(app: FastAPI):
     await create_db()
@@ -49,5 +50,6 @@ app.include_router(
 
 app.include_router(room_router)
 app.include_router(connection_router)
+app.include_router(login_router)
 
 app.frontend("/", directory="frontend", fallback="index.html")
