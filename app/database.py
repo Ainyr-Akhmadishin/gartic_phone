@@ -7,7 +7,8 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.models import Users, Base
 
-DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+DATABASE_URL = "postgresql+asyncpg://postgres:12345@localhost:5432/gartic_phone"
+
 
 engine = create_async_engine(DATABASE_URL)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)

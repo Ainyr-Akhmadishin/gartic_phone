@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Игровая комната — Сломанный телефон</title>
+  <link rel="stylesheet" href="css/main.css">
+  <script src="https://unpkg.com/easydraw-package/dist/easydraw.browser.js"></script>
+</head>
+<body>
+  <header class="header">
+    <a class="logo" href="index.html">Сломанный телефон</a>
+    <nav class="nav" aria-label="Основная навигация">
+      <ul>
+        <li><a href="profile.html">Мой профиль</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 1. ЛОББИ -->
+    <section id="lobby-section" class="filters game-lobby">
+      <h2>Лобби</h2>
+      <p class="lobby-subtitle">Код для приглашения друзей:</p>
+      <div class="room-code-container">
+        <input type="text" id="room-code-input" readonly>
+        <button class="btn" id="copy-room-btn" type="button">Копировать</button>
+      </div>
+      <div class="lobby-players-wrapper">
+        <h3>Игроки в комнате:</h3>
+        <div id="players-list" class="cards players-list"></div>
+      </div>
+      <button class="btn btn-start" id="start-game-btn" hidden>Начать игру</button>
+      <p id="waiting-text" class="waiting-text">Ожидание создателя комнаты...</p>
+    </section>
+
+    <!-- 2. ИГРА -->
+    <section id="game-section" class="filters game-play" hidden>
+      <div class="game-header">
+        <h2 id="game-phase-title">Загрузка...</h2>
+        <span id="game-round-display" class="game-round">Раунд: 1</span>
+      </div>
+
+      <div id="text-task-block" class="field text-task" hidden>
+        <label for="game-input" id="game-input-label" class="game-input-label"></label>
+        <img id="task-image" src="" alt="Рисунок" class="task-image" hidden>
+        <textarea id="game-input" rows="4" class="game-textarea"></textarea>
+        <p id="submitted-text-display" class="submitted-text" hidden></p>
+      </div>
+
+      <div id="draw-task-block" class="draw-task" hidden>
+        <label id="draw-input-label" class="draw-input-label"></label>
+        <div id="drawingArea" class="drawing-area"></div>
+      </div>
+
+      <button class="btn btn-submit" id="submit-task-btn">Отправить</button>
+      <p id="status-message" class="status-message"></p>
+    </section>
+
+    <!-- 3. РЕЗУЛЬТАТЫ -->
+    <section id="results-section" class="filters game-results" hidden>
+      <h2>Игра окончена!</h2>
+      <div id="results-container" class="results-container"></div>
+      <button class="btn btn-back" id="back-to-profile-btn">Вернуться в профиль</button>
+    </section>
+  </main>
+
+  <script src="js/game.js"></script>
+</body>
+</html>

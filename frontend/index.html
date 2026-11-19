@@ -1,90 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 Gartic Phone</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход — Сломанный телефон</title>
+  <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
-    <div class="container">
-        <h1>🎨 Gartic Phone</h1>
+<body class="auth-page">
+  <header class="header">
+    <a class="logo" href="index.html">Сломанный телефон</a>
+  </header>
 
-        <!-- ============================================ -->
-        <!-- АВТОРИЗАЦИЯ                                   -->
-        <!-- ============================================ -->
-        <div id="auth-section">
-            <h2>Вход / Регистрация</h2>
-            <div class="auth-form">
-                <input id="auth-email" type="email" placeholder="Email" value="test@example.com">
-                <input id="auth-password" type="password" placeholder="Пароль" value="12345678">
-                <input id="auth-username" type="text" placeholder="Имя пользователя (для регистрации)" value="Тестер">
+  <main class="auth-main">
+    <section class="auth" id="auth">
+      <h1>Сломанный телефон</h1>
+      <p class="auth-subtitle">Войдите или зарегистрируйтесь, чтобы начать игру</p>
 
-                <!-- ЧЕКБОКС ЗАПОМНИТЬ МЕНЯ -->
-                <div class="auth-options">
-                    <input type="checkbox" id="remember-me">
-                    <label for="remember-me">Запомнить меня</label>
-                </div>
+      <div class="auth-tabs" role="tablist">
+        <button class="active" type="button" role="tab" id="tab-login">Вход</button>
+        <button type="button" role="tab" id="tab-register">Регистрация</button>
+      </div>
 
-                <div class="auth-buttons">
-                    <button onclick="login()">Войти</button>
-                    <button onclick="register()">Зарегистрироваться</button>
-                </div>
-                <div id="auth-status"></div>
-            </div>
+      <form class="auth-form" id="auth-form" novalidate>
+        <div class="field">
+          <label for="auth-email">Email</label>
+          <input type="email" id="auth-email" required autocomplete="email" placeholder="you@example.com">
         </div>
 
-        <!-- ============================================ -->
-        <!-- ЛОББИ                                         -->
-        <!-- ============================================ -->
-        <div id="lobby" style="display:none;">
-            <h2>Лобби</h2>
-            <p>Привет, <span id="user-name"></span>!</p>
-            <div class="room-controls">
-                <input id="room-id-input" placeholder="ID комнаты" value="test-room">
-                <button onclick="createRoom()">Создать комнату</button>
-                <button onclick="joinRoom()">Присоединиться</button>
-                <button onclick="startGame()">Начать игру</button>
-            </div>
-            <div id="room-info" style="margin-top:10px;"></div>
+        <div class="field" id="auth-nickname-field" hidden>
+          <label for="auth-name">Имя игрока (ник)</label>
+          <input type="text" id="auth-name" minlength="2" autocomplete="username" placeholder="Например, Вася">
         </div>
 
-        <!-- ============================================ -->
-        <!-- ИГРОВОЙ ЭКРАН                                 -->
-        <!-- ============================================ -->
-        <div id="game-screen" style="display:none;">
-            <h2>Игра</h2>
-            <p>Комната: <span id="game-room-id"></span></p>
-            <p>Игроки: <span id="game-players"></span></p>
-            <div id="game-status"></div>
-
-            <div id="phase-display" style="margin: 10px 0; padding: 8px 12px; background: #e3f2fd; border-radius: 8px; font-weight: bold;">
-                Текущая фаза: <span id="current-phase">—</span>
-            </div>
-
-            <div id="task-area" style="margin: 10px 0; padding: 10px; background: #fff3e0; border-radius: 8px;">
-                <h3>📌 Задание</h3>
-                <div id="task-text" style="font-size: 16px; white-space: pre-wrap;">Ожидайте...</div>
-            </div>
-
-            <canvas id="canvas" width="600" height="400"></canvas>
-
-            <div class="game-controls">
-                <input id="phrase-input" placeholder="Напишите фразу...">
-                <button class="phrase-btn" onclick="sendPhrase()">📝 Фраза</button>
-                <input id="drawing-input" placeholder="base64 рисунка...">
-                <button class="drawing-btn" onclick="sendDrawing()">🎨 Рисунок</button>
-                <input id="desc-input" placeholder="Напишите описание...">
-                <button class="desc-btn" onclick="sendDescription()">📄 Описание</button>
-                <button class="ready-btn" onclick="sendReady()">✅ Готов</button>
-                <button onclick="startGame()" style="background:#FF9800;">Начать игру</button>
-            </div>
-            <div id="game-messages"></div>
+        <div class="field">
+          <label for="auth-password">Пароль</label>
+          <input type="password" id="auth-password" required minlength="8" autocomplete="current-password">
         </div>
 
-        <p id="status-message"></p>
-    </div>
+        <div class="field" id="auth-remember-field">
+          <label class="checkbox-label">
+            <input type="checkbox" id="auth-remember">
+            <span>Запомнить меня</span>
+          </label>
+        </div>
 
-    <script src="/js/app.js"></script>
+        <p class="error" id="auth-error" hidden></p>
+
+        <div class="auth-actions">
+          <button class="btn" type="submit" id="auth-submit">Войти</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <nav class="footer-nav" aria-label="Навигация в подвале">
+      <ul>
+        <li>Условия использования сервиса</li>
+        <li>Политика конфиденциальности</li>
+        <li>Правила рекомендаций</li>
+      </ul>
+    </nav>
+    <p class="footer-copy">© 2026 Сломанный телефон</p>
+  </footer>
+
+  <script src="js/app.js"></script>
 </body>
 </html>

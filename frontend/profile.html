@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Мой профиль — Сломанный телефон</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <header class="header">
+    <a class="logo" href="index.html">Сломанный телефон</a>
+    <nav class="nav" aria-label="Основная навигация">
+      <ul>
+        <li><a href="#" id="logout-btn">Выйти</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="profile-layout">
+    <aside class="profile-sidebar">
+      <section class="filters profile-card">
+        <h2>Мой профиль</h2>
+        <div id="my-profile-card" class="profile-info"></div>
+      </section>
+
+      <section class="filters">
+        <h3>Редактировать</h3>
+        <form id="edit-form" class="edit-form">
+          <div class="field">
+            <label for="edit-name">Новое имя</label>
+            <input type="text" id="edit-name" required minlength="2">
+          </div>
+          <div class="field">
+            <label for="edit-password">Новый пароль</label>
+            <input type="password" id="edit-password" minlength="8" placeholder="Не обязательно">
+          </div>
+          <button class="btn" type="submit">Сохранить</button>
+        </form>
+      </section>
+    </aside>
+
+    <div class="profile-main">
+      <section class="modes">
+        <div class="section-header">
+          <h2>Игровые комнаты</h2>
+          <div class="room-actions">
+            <button class="btn" type="button" id="create-room-btn">Создать комнату</button>
+            <button class="btn btn-secondary" type="button" id="join-room-btn">Присоединиться</button>
+          </div>
+        </div>
+        <div id="my-friends-list" class="cards">
+          <p class="empty-state">Создайте комнату или присоединитесь к друзьям!</p>
+        </div>
+      </section>
+
+      <section class="modes">
+        <h2>Сообщество</h2>
+        <div class="field search-field">
+          <input type="search" id="search-players" placeholder="Найти игрока по нику...">
+        </div>
+        <div id="all-players-list" class="cards"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/profile.js"></script>
+</body>
+</html>
