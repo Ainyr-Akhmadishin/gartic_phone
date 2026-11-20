@@ -1,0 +1,131 @@
+/* Фикс мобильного холста: используем после css/main.css. */
+#game-section, #draw-task-block, #drawingArea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Убираем фиксированную высоту 400px из main.css. */
+#drawingArea.drawing-area {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.mobile-paint-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  gap: 12px;
+}
+
+.paint-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border, #e6e7f0);
+  border-radius: 12px;
+  background: #f8f7ff;
+}
+
+.paint-palette, .paint-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.paint-color {
+  display: inline-block;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #ccc;
+  cursor: pointer;
+}
+.paint-color.is-active {
+  box-shadow: 0 0 0 3px #7057f5;
+}
+.paint-size-label {
+  display: inline-flex;
+  flex: 1 1 140px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  color: #29283d;
+  font-size: 13px;
+  font-weight: 600;
+}
+.paint-size-label input {
+  width: min(110px, 35vw);
+  accent-color: #7057f5;
+}
+.paint-action {
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid #d5d0eb;
+  border-radius: 9px;
+  background: #fff;
+  color: #29283d;
+  font-size: 13px;
+  font-weight: 600;
+}
+.paint-action.is-active {
+  background: #7057f5;
+  border-color: #7057f5;
+  color: #fff;
+}
+.paint-action:focus-visible, .paint-color:focus-visible {
+  outline: 3px solid #7057f5;
+  outline-offset: 2px;
+}
+.paint-canvas-frame {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border: 2px solid #d5d0eb;
+  border-radius: 12px;
+  background: #fff;
+}
+.paint-canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  background: white;
+  cursor: crosshair;
+  touch-action: none; /* Палец рисует, а не прокручивает страницу внутри холста. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+@media (max-width: 640px) {
+  #game-section.filters { padding: 20px 14px; }
+  #game-section .game-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  #game-section .game-header h2 {
+    margin-bottom: 0;
+    font-size: 22px;
+  }
+  .paint-toolbar { padding: 8px; gap: 12px; }
+  .paint-palette { width: 100%; justify-content: space-between; }
+  .paint-actions { width: 100%; }
+  .paint-actions .paint-action { flex: 1 1 auto; }
+  .paint-size-label { width: 100%; flex-basis: 100%; }
+  #submit-task-btn { width: 100%; }
+}
